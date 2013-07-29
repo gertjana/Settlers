@@ -4,20 +4,20 @@ import com.jme3.scene.{Node, Geometry, Spatial, Mesh}
 import com.jme3.scene.VertexBuffer.Type
 import com.jme3.util.BufferUtils
 import scala.util.Random
-import com.jme3.terrain.heightmap.{ImageBasedHeightMap, HeightMap, AbstractHeightMap}
+import com.jme3.terrain.heightmap.{ImageBasedHeightMap}
 import com.jme3.asset.AssetManager
-import com.jme3.math.{ColorRGBA, Quaternion, Vector2f, Vector3f}
+import com.jme3.math.{ColorRGBA, Vector2f, Vector3f}
 import scala.collection.immutable.TreeMap
 import com.jme3.texture.Texture.WrapMode
 import com.jme3.material.Material
+import net.addictivesoftware.settlers.objects.GridObject
 
 class HexagonWorld(size:Int) extends World {
-  var heightMap:AbstractHeightMap = null;
 
   val coordinatesMap = coordinates(size)
   var verts = TreeMap[Int, Vector3f]()
 
-  var peopleGeom:List[(People, Spatial)] = List[(People, Spatial)]()
+  var gridObjectGeometries:List[(GridObject, Spatial)] = List[(GridObject, Spatial)]()
   val nrOfPeople = 400
   var peoples:TreeMap[Int, People] = TreeMap[Int, People]()
 
@@ -45,7 +45,7 @@ class HexagonWorld(size:Int) extends World {
       val g = p.init(assetManager)
       g.setLocalTranslation(p.currentPosition())
       //g.setLocalRotation(Rotations.pitch60min)
-      peopleGeom = (p,g) :: peopleGeom
+      gridObjectGeometries = (p,g) :: gridObjectGeometries
       gridNode.attachChild(g)
     }
     gridNode.attachChild(geom)
@@ -55,12 +55,6 @@ class HexagonWorld(size:Int) extends World {
   def createMesh(assetManager:AssetManager):Mesh = {
     val start = System.currentTimeMillis()
     val mesh = new Mesh()
-
-    val heightMapImage = assetManager.loadTexture("Textures/Terrain/splat/mountains512.png");
-    heightMap = new ImageBasedHeightMap(heightMapImage.getImage());
-    heightMap.load();
-    heightMap.setSize(heightMap.getSize()*2)
-    heightMap.setHeightScale(0.02f)
 
     verts = vertices(size)
 
@@ -76,16 +70,10 @@ class HexagonWorld(size:Int) extends World {
 
   def update(tpf:Float) = {
     println("updating world")
-    for ((p,g) <- peopleGeom) {
-      val pos = p.update(this, tpf)
-      g.setLocalTranslation(pos)
-      val q = new Quaternion()
-      q.lookAt(p.origin.subtract(p.destination), new Vector3f(0,0,1))
-      g.setLocalRotation(q)
+    for ((p,g) <- gridObjectGeometries) {
+      p.update(this, g, tpf)
     }
   }
-
-
 
   def getPosition(x:Int, y:Int):Vector3f = {
     coordinatesMap.get((x,y)) match {
@@ -98,12 +86,6 @@ class HexagonWorld(size:Int) extends World {
     }
   }
 
-  //
-  //        03  07  11
-  //      02  06  10
-  //    01  05  09
-  //  00  04  08
-  //
   val xFactor = 1.0f
   val yFactor:Float = xFactor * (math.sin(math.toRadians(60)).toFloat)
   val zFactor = 0.3f
@@ -159,9 +141,9 @@ class HexagonWorld(size:Int) extends World {
   private def textureCoordinates(size:Int) = {
     Array[Vector2f](
       new Vector2f(0.0f, 0.0f),
-      new Vector2f(xFactor, 0.0f),
-      new Vector2f((xFactor+0.5f), yFactor),
-      new Vector2f(0.5f, yFactor)
+      new Vector2f(xFactor*size, 0.0f),
+      new Vector2f((xFactor*size+0.5f), yFactor*size),
+      new Vector2f(0.5f, yFactor*size)
     )
   }
 
@@ -171,10 +153,7 @@ class HexagonWorld(size:Int) extends World {
       c =>
         val x = c._1._1
         val y = c._1._2
-        //
-        //   se th
-        // fi  fo
-        //
+
         val first = coordinatesMap.get((x,y))
         val second = coordinatesMap.get((x, y+1))
         val third = coordinatesMap.get((x+1, y+1))

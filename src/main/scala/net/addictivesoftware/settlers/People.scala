@@ -31,7 +31,7 @@ class People(position:Vector3f) extends objects.GridObject {
     current
   }
 
-  def update(world:World, tpf:Float):Vector3f = {
+  def update(world:World, geometry: Spatial, tpf:Float) = {
     println("updating people")
     count = count - tpf
 
@@ -51,7 +51,10 @@ class People(position:Vector3f) extends objects.GridObject {
         isMoving = true
       }
     }
-    current
+    geometry.setLocalTranslation(current)
+    val q = new Quaternion()
+    q.lookAt(origin.subtract(destination), new Vector3f(0,0,1))
+    geometry.setLocalRotation(q)
   }
 
 }

@@ -9,5 +9,5 @@ abstract class GridObject {
 
   def init(assetManager:AssetManager):Spatial
 
-  def update(world:World, tpf:Float):Vector3f
+  def update(world:World, geometry:Spatial, tpf:Float)
 }
