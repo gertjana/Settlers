@@ -7,7 +7,7 @@ import scala.collection.immutable.TreeMap
 //    01  05  09
 //  00  04  08
 //
-val size = 1
+val size = 2
 val xFactor = 1.0f
 val yFactor:Float = xFactor * (math.sin(math.toRadians(60)).toFloat)
 val zFactor = 0.1f
@@ -20,8 +20,6 @@ def coordinates(size:Int):TreeMap[(Int, Int), Int] = {
   }
   TreeMap(coords:_*)
 }
-
-
 def vertices(size:Int):Array[Vector3f] = {
   coordinates(size).map {
     c =>
@@ -34,8 +32,6 @@ def vertices(size:Int):Array[Vector3f] = {
       )
   }.toArray
 }
-
-
 def textureCoordinates(size:Int) = {
   Array[Vector2f](
     new Vector2f(0.0f, 0.0f),
@@ -68,15 +64,24 @@ def triangleIndices(size:Int):Array[Int] = {
   }
   result
 }
-vertices(size)
+
+val position = new Vector3f(0.5f, 0.866f, 0.0f)
+
+val coords = coordinates(size)
+
+
+val verts = vertices(size)
 
 
 
 
-textureCoordinates(size)
+val found = verts.find(
+  p =>
+    math.abs(p.x - position.x) < 0.01f &&
+    math.abs(p.y - position.y) < 0.01f
+)
 
-triangleIndices(size)
-
+println(found)
 
 
 
