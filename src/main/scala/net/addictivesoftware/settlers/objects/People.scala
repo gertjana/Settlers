@@ -1,4 +1,4 @@
-package net.addictivesoftware.settlers
+package net.addictivesoftware.settlers.objects
 
 import scala.collection.immutable.TreeMap
 import com.jme3.scene.{Spatial, Geometry, Node}
@@ -7,6 +7,7 @@ import com.jme3.material.Material
 import com.jme3.math.{Quaternion, FastMath, Vector3f, ColorRGBA}
 import com.jme3.asset.AssetManager
 import com.jme3.texture.Texture
+import net.addictivesoftware.settlers.{World, Rotations, objects}
 
 class People(position:Vector3f) extends objects.GridObject {
   val speed = 0.01f
@@ -19,8 +20,6 @@ class People(position:Vector3f) extends objects.GridObject {
   var isMoving = false
 
   def init(assetManager:AssetManager):Spatial = {
-    val q = new Box(0.1f, 0.2f, 0.1f)
-
     val ninja = assetManager.loadModel("Models/Ninja/Ninja.mesh.xml")
     ninja.scale(0.001f, 0.001f, 0.001f)
     ninja.setLocalRotation(Rotations.pitch90)
