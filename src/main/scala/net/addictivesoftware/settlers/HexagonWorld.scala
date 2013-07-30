@@ -4,13 +4,12 @@ import com.jme3.scene.{Node, Geometry, Spatial, Mesh}
 import com.jme3.scene.VertexBuffer.Type
 import com.jme3.util.BufferUtils
 import scala.util.Random
-import com.jme3.terrain.heightmap.{ImageBasedHeightMap}
 import com.jme3.asset.AssetManager
 import com.jme3.math.{ColorRGBA, Vector2f, Vector3f}
 import scala.collection.immutable.TreeMap
 import com.jme3.texture.Texture.WrapMode
 import com.jme3.material.Material
-import net.addictivesoftware.settlers.objects.GridObject
+import net.addictivesoftware.settlers.objects.{People, Tree, GridObject}
 
 class HexagonWorld(size:Int) extends World {
 
@@ -18,21 +17,25 @@ class HexagonWorld(size:Int) extends World {
   var verts = TreeMap[Int, Vector3f]()
 
   var gridObjectGeometries:List[(GridObject, Spatial)] = List[(GridObject, Spatial)]()
-  val nrOfPeople = 400
+  val nrOfPeople = 200
   var peoples:TreeMap[Int, People] = TreeMap[Int, People]()
+
+  val nrOfTrees = 200
+  var trees:TreeMap[Int, Tree] = TreeMap[Int, Tree]()
 
   def init(assetManager:AssetManager) = {
     val geom = new Geometry("Box", createMesh(assetManager))
 
     peoples = People.createABunchOfPeople(size, nrOfPeople, this)
+    trees = Tree.createABunchOfTrees(size, nrOfTrees, this)
 
     //cam.setFrustumPerspective(45f, cam.getWidth() / cam.getHeight(), 0.01f, 1000f);
 
     val grass = assetManager.loadTexture("Textures/Terrain/splat/grass.jpg")
-    grass.setWrap(WrapMode.Repeat)
+    //grass.setWrap(WrapMode.Repeat)
 
     val mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-    mat.setColor("Color", ColorRGBA.White)
+    mat.setColor("Color", ColorRGBA.LightGray)
     //mat.setTexture("ColorMap", grass)
     geom.setMaterial(mat)
     geom.getMaterial.getAdditionalRenderState.setWireframe(true)
@@ -44,10 +47,19 @@ class HexagonWorld(size:Int) extends World {
     for ((i, p) <- peoples) {
       val g = p.init(assetManager)
       g.setLocalTranslation(p.currentPosition())
-      //g.setLocalRotation(Rotations.pitch60min)
       gridObjectGeometries = (p,g) :: gridObjectGeometries
       gridNode.attachChild(g)
     }
+
+    for ((i, p) <- trees) {
+      val g = p.init(assetManager)
+      g.setLocalTranslation(p.currentPosition())
+      gridObjectGeometries = (p,g) :: gridObjectGeometries
+      gridNode.attachChild(g)
+    }
+
+
+
     gridNode.attachChild(geom)
     gridNode
   }
@@ -69,7 +81,6 @@ class HexagonWorld(size:Int) extends World {
   }
 
   def update(tpf:Float) = {
-    println("updating world")
     for ((p,g) <- gridObjectGeometries) {
       p.update(this, g, tpf)
     }
@@ -141,9 +152,9 @@ class HexagonWorld(size:Int) extends World {
   private def textureCoordinates(size:Int) = {
     Array[Vector2f](
       new Vector2f(0.0f, 0.0f),
-      new Vector2f(xFactor*size, 0.0f),
-      new Vector2f((xFactor*size+0.5f), yFactor*size),
-      new Vector2f(0.5f, yFactor*size)
+      new Vector2f(1.0f/size, 0.0f),
+      new Vector2f(0.0f, 1.0f/size),
+      new Vector2f(1.0f/size, 1.0f/size)
     )
   }
 
