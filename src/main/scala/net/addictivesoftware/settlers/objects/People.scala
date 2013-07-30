@@ -7,7 +7,7 @@ import com.jme3.material.Material
 import com.jme3.math.{Quaternion, FastMath, Vector3f, ColorRGBA}
 import com.jme3.asset.AssetManager
 import com.jme3.texture.Texture
-import net.addictivesoftware.settlers.{World, Rotations, objects}
+import net.addictivesoftware.settlers.{HexagonWorld, World, Rotations, objects}
 
 class People(position:Vector3f) extends objects.GridObject {
   val speed = 0.01f
@@ -31,7 +31,6 @@ class People(position:Vector3f) extends objects.GridObject {
   }
 
   def update(world:World, geometry: Spatial, tpf:Float) = {
-    println("updating people")
     count = count - tpf
 
     if (count < 0) {

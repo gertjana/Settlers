@@ -10,7 +10,7 @@ import com.jme3.texture.Texture.WrapMode
 
 
 class SettlersApp() extends SimpleApplication {
-  val size = 40
+  val size = 50
   var world = new HexagonWorld(size)
 
 
